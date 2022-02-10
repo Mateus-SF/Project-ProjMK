@@ -1,59 +1,53 @@
 from BaseFiles.Notification import Notification
-import os
+from os import path
+from Model.ModelProject import ModelProject
+from copy import deepcopy
 
 class Project:
-    __slots__ = '__ptype', '__directory', '__notification', '__create_files'
+    __slots__ = '__ptype', '__directory', '__notification', '__create_files', '__folders', '__files'
 
-    PROJECT_TYPES = {
-        'emd': {
-            'folders': ('BaseFiles', 'Entity', 'DataModules', 'DataBases', 'Model', 'Server'),
-            'files': {
-                'BaseFiles': (
-                    '\\Exceptions.py', '\\GenericFunctions.py', '\\Notification.py', '\\EnumTypes.py',
-                    '\\RegExPatterns.py'
-                )
-            }
-        },
-
-        'mvc': {
-            'folders': ('Model', 'View', 'Controller', 'DataBases', 'Server'),
-            'files': {}
-        },
-        'simple': {
-            'folders': ('Scripts', 'Databases'),
-            'files': {
-                'Scripts': ('\\Main.py', )
-            }
-        }
-    }
-
-    def __init__(self, **kwargs):
+    def __init__(self, np=True, **kwargs):
         self.__ptype = kwargs['type']
         self.__directory = kwargs['directory']
-        self.__create_files = kwargs['files']
+        self.__create_files = kwargs['create_files']
+
         self.__notification = Notification()
 
-    def create(self):
-        if self.__notification:
-            try:
-                os.mkdir(self.__directory)
+    @property
+    def notification(self):
+        return deepcopy(self.__notification)
 
-                for folder in self.PROJECT_TYPES[self.__ptype]['folders']:
-                    os.mkdir(self.__directory + '\\' + folder)
-                    if self.__create_files:
-                        for file in self.PROJECT_TYPES[self.__ptype]['files'].get(folder, ()):
-                            with open(self.__directory + '\\' + folder + '\\' + file, 'w') as _file:
-                                pass
+    @property
+    def directory(self):
+        return self.__directory
 
-            except Exception as ex:
-                self.__notification.set_valid(False)
-                self.__notification.set_message(ex)
+    @property
+    def ptype(self):
+        return self.__ptype
 
-        return self.__notification
+    @property
+    def create_files(self):
+        return self.__create_files
+
+    @property
+    def folders(self):
+        return self.__folders
+
+    @property
+    def files(self):
+        return self.__files
+
+    @classmethod
+    def delete_project(cls, project_type):
+        return ModelProject.delete_project(project_type)
+
+    @classmethod
+    def register_project(cls, ptype, folders=None, files=None):
+        return ModelProject.register_project(ptype, [] if folders is None else folders, [] if files is None else files)
 
     def __process__(self):
         self.__verify()
-        return self
+        return ModelProject(self)
 
     def __verify(self):
         self.__notification.set_valid(True)
@@ -61,6 +55,6 @@ class Project:
         self.__verify_dir()
 
     def __verify_dir(self):
-        if os.path.isdir(self.__directory):
+        if path.isdir(self.__directory):
             self.__notification.set_valid(False)
             self.__notification.set_message('Project directiory already exists')

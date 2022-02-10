@@ -1,9 +1,9 @@
 class Notification:
     __slots__ = '__valid', '__message'
 
-    def __init__(self):
-        self.__valid = False
-        self.__message = 'Empty notification'
+    def __init__(self, valid=False, message='Empty notification'):
+        self.__valid = valid
+        self.__message = message
 
     def set_valid(self, value):
         self.__valid = value

@@ -39,7 +39,7 @@ parser_register_project.add_argument(
 )
 
 parser_register_project.add_argument(
-    '-fis', '--project_files', dest='files', type=str, metavar='', help='Define the project files', required=True,
+    '-fis', '--project_files', dest='files', type=str, metavar='', help='Define the project files',
     nargs='+'
 )
 
@@ -53,20 +53,16 @@ parser_delete_project.add_argument(
 
 def run():
     args = parser.parse_args()
+
     if args.command == 'newproj':
-        print(
-            process(
-                Project(directory=args.dir, type=args.type, files=args.file)
-            ).create()
-        )
+        print(process(Project(directory=args.dir, type=args.type, create_files=args.file)).new_project())
+
     elif args.command == 'regproj':
-        ...
+        print(Project.register_project(ptype=args.type, folders=args.folders, files=args.files))
+
     elif args.command == 'delproj':
-        with DataModuleMain() as dm:
-            if dm.delete_project(args.project_type):
-                print(f'Project {args.project_type} deleted')
-            else:
-                print(f'Failed to delete project {args.project_type}')
+        print(Project.delete_project(args.project_type))
+
     elif args.command == 'updproj':
         ...
 
