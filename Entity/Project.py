@@ -2,7 +2,7 @@ from BaseFiles.Notification import Notification
 import os
 
 class Project:
-    __slots__ = '__ptype', '__directory', '__notification'
+    __slots__ = '__ptype', '__directory', '__notification', '__create_files'
 
     PROJECT_TYPES = {
         'emd': {
@@ -15,13 +15,22 @@ class Project:
             }
         },
 
-        'mvc': '',
-        'simple': ''
+        'mvc': {
+            'folders': ('Model', 'View', 'Controller', 'DataBases', 'Server'),
+            'files': {}
+        },
+        'simple': {
+            'folders': ('Scripts', 'Databases'),
+            'files': {
+                'Scripts': ('\\Main.py', )
+            }
+        }
     }
 
-    def __init__(self, directory, ptype='simple'):
-        self.__ptype = ptype
-        self.__directory = directory
+    def __init__(self, **kwargs):
+        self.__ptype = kwargs['type']
+        self.__directory = kwargs['directory']
+        self.__create_files = kwargs['files']
         self.__notification = Notification()
 
     def create(self):
@@ -31,10 +40,10 @@ class Project:
 
                 for folder in self.PROJECT_TYPES[self.__ptype]['folders']:
                     os.mkdir(self.__directory + '\\' + folder)
-
-                    for file in self.PROJECT_TYPES[self.__ptype]['files'].get(folder, ()):
-                        with open(self.__directory + '\\' + folder + '\\' + file, 'w') as _file:
-                            pass
+                    if self.__create_files:
+                        for file in self.PROJECT_TYPES[self.__ptype]['files'].get(folder, ()):
+                            with open(self.__directory + '\\' + folder + '\\' + file, 'w') as _file:
+                                pass
 
             except Exception as ex:
                 self.__notification.set_valid(False)
